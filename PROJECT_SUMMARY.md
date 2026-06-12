@@ -2,7 +2,7 @@
 
 ## 项目名称
 
-FIFA 2026 World Cup Virtual Betting
+FIFA—2026 World Cup Virtual Betting
 
 ## 一句话介绍
 
