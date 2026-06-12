@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block title %}赛程总览 - FIFA 2026 虚拟赌球{% endblock %}
+{% block content %}
+
+<!-- 全局反赌统计面板 -->
+{% if current_user.is_authenticated and stats.total_bets > 0 %}
+<div class="container mb-4">
+    <div class="card bg-danger border-danger">
+        <div class="card-body text-center">
+            <h5 class="text-white mb-3"><i class="bi bi-exclamation-octagon-fill"></i> 虚拟赌博实况 — 看看你"赌"了会亏多少</h5>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="stat-box">
+                        <div class="stat-number text-warning">{{ stats.total_bets }}</div>
+                        <div class="stat-label">总投注笔数</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-box">
+                        <div class="stat-number text-info">{{ "%.1f"|format(stats.win_rate) }}%</div>
+                        <div class="stat-label">命中率</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-box">
+                        <div class="stat-number text-success">{{ "{:,.0f}".format(stats.total_amount) }}</div>
+                        <div class="stat-label">总下注金额</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-box">
+                        <div class="stat-number text-warning">{{ "{:,.0f}".format(stats.total_payout) }}</div>
+                        <div class="stat-label">总赢得金额</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-box">
+                        <div class="stat-number {% if stats.profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            {% if stats.profit >= 0 %}+{% endif %}{{ "{:,.0f}".format(stats.profit) }}
+                        </div>
+                        <div class="stat-label">{% if stats.profit < 0 %}总亏损{% else %}总盈利{% endif %}</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-box">
+                        <div class="stat-number text-light">{{ stats.total_won }}胜 / {{ stats.total_lost }}负</div>
+                        <div class="stat-label">胜 / 负</div>
+                    </div>
+                </div>
+            </div>
+            {% if stats.profit < 0 %}
+            <div class="mt-3">
+                <span class="badge bg-dark fs-6">
+                    <i class="bi bi-emoji-tear-fill text-warning"></i>
+                    如果这是真钱，你已经亏了 <strong class="text-danger">{{ "{:,.0f}".format(stats.profit|abs) }} 元</strong>
+                </span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 赛程列表 -->
+<div class="container">
+
+    <!-- 小组赛 -->
+    <h3 class="text-center text-warning mb-4">
+        <i class="bi bi-calendar-event"></i> 2026 FIFA 世界杯赛程
+    </h3>
+
+    <!-- 小组赛导航标签 -->
+    <ul class="nav nav-pills mb-3 justify-content-center" id="groupTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="group-stage-tab" data-bs-toggle="pill" data-bs-target="#group-stage" type="button" role="tab">
+                <i class="bi bi-people-fill"></i> 小组赛 (72场)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ko-stage-tab" data-bs-toggle="pill" data-bs-target="#ko-stage" type="button" role="tab">
+                <i class="bi bi-trophy"></i> 淘汰赛 (32场)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- 小组赛 -->
+        <div class="tab-pane fade show active" id="group-stage" role="tabpanel">
+            {% for group_name, matches in groups.items() %}
+            {% if group_name in ['A','B','C','D','E','F','G','H','I','J','K','L'] %}
+            <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-people-fill text-warning"></i> {{ group_name }} 组
+                    </h5>
+                    <span class="badge bg-warning text-dark">小组赛</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th width="160">比赛时间</th>
+                                    <th width="80">状态</th>
+                                    <th class="text-end" width="150">主队</th>
+                                    <th width="60" class="text-center">比分</th>
+                                    <th width="150">客队</th>
+                                    <th width="120">盘口</th>
+                                    <th width="100">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for match in matches %}
+                                <tr class="{% if match.status == 'live' %}table-danger{% elif match.status == 'finished' %}table-secondary{% endif %}">
+                                    <td class="align-middle">
+                                        <small>{{ match.match_time.strftime('%m/%d %H:%M') }} 北京时间</small>
+                                    </td>
+                                    <td class="align-middle">
+                                        {% if match.status == 'upcoming' %}
+                                        <span class="badge bg-info">未开始</span>
+                                        {% elif match.status == 'live' %}
+                                        <span class="badge bg-danger blink">进行中</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">已结束</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle text-end fw-bold">{{ match.team1 }}</td>
+                                    <td class="align-middle text-center fw-bold text-warning">
+                                        {% if match.status in ('live', 'finished') %}
+                                            {{ match.score1 }} - {{ match.score2 }}
+                                        {% else %}
+                                            VS
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle fw-bold">{{ match.team2 }}</td>
+                                    <td class="align-middle">
+                                        {% if match.status == 'upcoming' %}
+                                            {% for odds in match.odds if odds.odds_type == 'win_draw_lose' and odds.selection == 'home_win' %}
+                                            <small class="text-muted">{{ odds.avg_current if odds.avg_current is not none else '缺' }}</small>
+                                            {% endfor %}
+                                            /
+                                            {% for odds in match.odds if odds.odds_type == 'win_draw_lose' and odds.selection == 'draw' %}
+                                            <small class="text-muted">{{ odds.avg_current if odds.avg_current is not none else '缺' }}</small>
+                                            {% endfor %}
+                                            /
+                                            {% for odds in match.odds if odds.odds_type == 'win_draw_lose' and odds.selection == 'away_win' %}
+                                            <small class="text-muted">{{ odds.avg_current if odds.avg_current is not none else '缺' }}</small>
+                                            {% endfor %}
+                                        {% else %}
+                                            <small class="text-muted">—</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle">
+                                        <a href="{{ url_for('match_detail', match_id=match.id) }}" class="btn btn-sm btn-outline-warning">
+                                            {% if match.status == 'upcoming' %}投注{% else %}详情{% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- 淘汰赛 -->
+        <div class="tab-pane fade" id="ko-stage" role="tabpanel">
+            {% set ko_stages = ['32强', '16强', '8强', '半决赛', '三四名', '决赛'] %}
+            {% for stage in ko_stages %}
+            {% if stage in groups %}
+            <div class="card bg-dark border-warning mb-3">
+                <div class="card-header {% if stage == '决赛' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %} d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        {% if stage == '32强' %}<i class="bi bi-hash"></i>
+                        {% elif stage == '16强' %}<i class="bi bi-hash"></i>
+                        {% elif stage == '8强' %}<i class="bi bi-hash"></i>
+                        {% elif stage == '半决赛' %}<i class="bi bi-star"></i>
+                        {% elif stage == '三四名' %}<i class="bi bi-star-half"></i>
+                        {% else %}<i class="bi bi-trophy-fill text-dark"></i>{% endif %}
+                        {{ stage }}
+                    </h5>
+                    <span class="badge {% if stage == '决赛' %}bg-dark{% else %}bg-warning text-dark{% endif %}">
+                        {% if stage == '32强' %}16场{% elif stage == '16强' %}8场{% elif stage == '8强' %}4场{% elif stage == '半决赛' %}2场{% elif stage == '三四名' %}1场{% else %}1场{% endif %}
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th width="160">比赛时间</th>
+                                    <th width="80">状态</th>
+                                    <th class="text-end" width="180">主队</th>
+                                    <th width="60" class="text-center">比分</th>
+                                    <th width="180">客队</th>
+                                    <th width="120">盘口</th>
+                                    <th width="100">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for match in groups[stage] %}
+                                <tr class="{% if match.status == 'live' %}table-danger{% elif match.status == 'finished' %}table-secondary{% endif %}">
+                                    <td class="align-middle">
+                                        <small>{{ match.match_time.strftime('%m/%d %H:%M') }} 北京时间</small>
+                                    </td>
+                                    <td class="align-middle">
+                                        {% if match.status == 'upcoming' %}
+                                        <span class="badge bg-info">未开始</span>
+                                        {% elif match.status == 'live' %}
+                                        <span class="badge bg-danger blink">进行中</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">已结束</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle text-end fw-bold">{{ match.team1 }}</td>
+                                    <td class="align-middle text-center fw-bold text-warning">
+                                        {% if match.status in ('live', 'finished') %}
+                                            {{ match.score1 }} - {{ match.score2 }}
+                                        {% else %}
+                                            VS
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle fw-bold">{{ match.team2 }}</td>
+                                    <td class="align-middle">
+                                        {% if match.status == 'upcoming' %}
+                                            {% for odds in match.odds if odds.odds_type == 'win_draw_lose' and odds.selection == 'home_win' %}
+                                            <small class="text-muted">{{ odds.avg_current if odds.avg_current is not none else '缺' }}</small>
+                                            {% endfor %}
+                                            /
+                                            {% for odds in match.odds if odds.odds_type == 'win_draw_lose' and odds.selection == 'draw' %}
+                                            <small class="text-muted">{{ odds.avg_current if odds.avg_current is not none else '缺' }}</small>
+                                            {% endfor %}
+                                            /
+                                            {% for odds in match.odds if odds.odds_type == 'win_draw_lose' and odds.selection == 'away_win' %}
+                                            <small class="text-muted">{{ odds.avg_current if odds.avg_current is not none else '缺' }}</small>
+                                            {% endfor %}
+                                        {% else %}
+                                            <small class="text-muted">—</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle">
+                                        <a href="{{ url_for('match_detail', match_id=match.id) }}" class="btn btn-sm btn-outline-warning">
+                                            {% if match.status == 'upcoming' %}投注{% else %}详情{% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+
+            <!-- 淘汰赛说明 -->
+            <div class="alert alert-secondary text-center">
+                <i class="bi bi-info-circle"></i>
+                淘汰赛对阵双方将在小组赛结束后确定。届时赔率将根据实际对阵更新。<br>
+                <small class="text-muted">常规时间（含伤停补时）平局则按"平局"结算；加时/点球不计入结果。</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

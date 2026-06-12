@@ -1,0 +1,223 @@
+body {
+    min-height: 100vh;
+    margin: 0;
+    color: #17201b;
+    background:
+        linear-gradient(180deg, rgba(18, 35, 28, 0.94), rgba(18, 35, 28, 0.70) 260px, transparent 261px),
+        #f4f6f1;
+    font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+}
+
+.navbar {
+    background: #101914 !important;
+    border-bottom: 3px solid #d6b248 !important;
+}
+
+.navbar-brand span {
+    letter-spacing: 0;
+}
+
+.warning-banner {
+    background: #f7dc6f;
+    color: #2f2610;
+    border-bottom: 1px solid #d2a820;
+    padding: 9px 0;
+    font-size: 0.92rem;
+}
+
+main.container-fluid {
+    max-width: 1500px;
+}
+
+.card {
+    border: 1px solid #d8ded4 !important;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(16, 25, 20, 0.08);
+    background: #ffffff !important;
+    color: #17201b;
+}
+
+.card.bg-dark,
+.list-group-item.bg-dark {
+    background: #ffffff !important;
+    color: #17201b;
+}
+
+.card-header {
+    border-bottom: 1px solid #d8ded4 !important;
+    background: #15251d !important;
+    color: #f9f5e3 !important;
+    border-radius: 6px 6px 0 0 !important;
+}
+
+.card-header.bg-warning,
+.card-header.bg-success {
+    background: #d6b248 !important;
+    color: #17130a !important;
+}
+
+.text-white,
+.text-light {
+    color: #17201b !important;
+}
+
+.text-warning {
+    color: #b48418 !important;
+}
+
+.text-muted {
+    color: #66736b !important;
+}
+
+.table-dark {
+    --bs-table-bg: #ffffff;
+    --bs-table-color: #17201b;
+    --bs-table-hover-bg: #eef4ed;
+    --bs-table-border-color: #d8ded4;
+    color: #17201b;
+}
+
+.table-dark thead th {
+    background: #20362b;
+    color: #f9f5e3;
+    border-bottom: 2px solid #d6b248 !important;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+}
+
+.table-dark td,
+.table-dark th {
+    vertical-align: middle;
+}
+
+.table-hover > tbody > tr:hover > * {
+    color: #17201b !important;
+    background: #eaf1e9 !important;
+}
+
+.table-hover > tbody > tr:hover .text-muted,
+.table-hover > tbody > tr:hover small,
+.table-hover > tbody > tr:hover a {
+    color: #526158 !important;
+}
+
+.table-hover > tbody > tr:hover .text-warning {
+    color: #8a6412 !important;
+}
+
+.table-hover > tbody > tr:hover .text-success {
+    color: #146c43 !important;
+}
+
+.table-hover > tbody > tr:hover .text-danger {
+    color: #a52834 !important;
+}
+
+.table-hover > tbody > tr:hover .text-info {
+    color: #087990 !important;
+}
+
+.odds-source-row td {
+    background: #f7f8f4 !important;
+    border-top: 0 !important;
+    padding-top: 0;
+}
+
+.bg-warning.bg-opacity-10 {
+    background: #fff4c9 !important;
+}
+
+.badge {
+    border-radius: 4px;
+}
+
+.btn {
+    border-radius: 5px;
+}
+
+.btn-warning {
+    background: #d6b248;
+    border-color: #d6b248;
+    color: #17130a;
+}
+
+.btn-outline-warning {
+    border-color: #b48418;
+    color: #8a6412;
+}
+
+.btn-outline-warning:hover {
+    background: #d6b248;
+    border-color: #d6b248;
+    color: #17130a;
+}
+
+.form-control,
+.input-group-text {
+    border-radius: 5px;
+}
+
+.form-control.bg-dark,
+.input-group-text.bg-dark,
+.input-group-text.bg-secondary {
+    background: #fbfcf8 !important;
+    color: #17201b !important;
+    border-color: #cfd8cf !important;
+}
+
+.form-control:focus {
+    border-color: #3f8f63;
+    box-shadow: 0 0 0 0.2rem rgba(63, 143, 99, 0.20);
+}
+
+.stat-box {
+    padding: 12px;
+}
+
+.stat-number {
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    color: #66736b;
+}
+
+.match-vs {
+    padding: 22px 0;
+}
+
+.bet-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(214, 178, 72, 0.25);
+}
+
+#bet-panel {
+    position: sticky;
+    top: 82px;
+}
+
+.list-group-item {
+    border-color: #d8ded4 !important;
+}
+
+.blink {
+    animation: blink 1.2s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+@media (max-width: 768px) {
+    .display-3,
+    .display-4 {
+        font-size: 2rem;
+    }
+
+    h3 {
+        font-size: 1.25rem !important;
+    }
+}

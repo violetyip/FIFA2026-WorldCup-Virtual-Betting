@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}我的投注 - FIFA 2026 虚拟赌球{% endblock %}
+{% block content %}
+<div class="container">
+    <h3 class="text-center text-warning mb-4"><i class="bi bi-receipt"></i> 我的投注记录</h3>
+
+    <!-- 投注统计 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-dark border-secondary text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">总投注笔数</h6>
+                    <h3 class="text-white">{{ bets|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-secondary text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">总下注金额</h6>
+                    <h3 class="text-warning">¥{{ "{:,.0f}".format(total_stake) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-secondary text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">总赢得金额</h6>
+                    <h3 class="text-success">¥{{ "{:,.0f}".format(total_won) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark border-secondary text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">净盈亏</h6>
+                    {% set profit = total_won - total_bet %}
+                    <h3 class="{% if profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {% if profit >= 0 %}+{% endif %}¥{{ "{:,.0f}".format(profit) }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if profit < 0 %}
+    <div class="alert alert-danger text-center">
+        <i class="bi bi-emoji-tear-fill"></i>
+        <strong>模拟结果：</strong>如果这是真钱，你已经亏了 <strong>¥{{ "{:,.0f}".format(profit|abs) }}</strong>。
+        这就是赌博的真实面目 — 十赌九输。
+    </div>
+    {% endif %}
+
+    <!-- 投注列表 -->
+    {% if bets %}
+    <div class="card bg-dark border-secondary">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>比赛</th>
+                            <th>盘口</th>
+                            <th>选项</th>
+                            <th>赔率</th>
+                            <th>下注金额</th>
+                            <th>状态</th>
+                            <th>盈亏</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bet in bets %}
+                        <tr>
+                            <td><small>{{ bet.created_at.strftime('%m/%d %H:%M') }}</small></td>
+                            <td>{{ bet.match.team1 }} vs {{ bet.match.team2 }}</td>
+                            <td>{% if bet.odds_type == 'win_draw_lose' %}胜平负{% else %}已取消玩法{% endif %}</td>
+                            <td>
+                                {% if bet.selection == 'home_win' %}主胜
+                                {% elif bet.selection == 'draw' %}平局
+                                {% elif bet.selection == 'away_win' %}客胜
+                                {% else %}已取消{% endif %}
+                            </td>
+                            <td class="text-warning">{{ bet.odds_value }}</td>
+                            <td>¥{{ "%.0f"|format(bet.amount) }}</td>
+                            <td>
+                                {% if bet.status == 'pending' %}
+                                <span class="badge bg-secondary">待结算</span>
+                                {% elif bet.status == 'won' %}
+                                <span class="badge bg-success">命中</span>
+                                {% else %}
+                                <span class="badge bg-danger">未中</span>
+                                {% endif %}
+                            </td>
+                            <td class="{% if bet.status == 'won' %}text-success{% elif bet.status == 'lost' %}text-danger{% else %}text-muted{% endif %}">
+                                {% if bet.status == 'won' %}+{{ "%.2f"|format(bet.payout - bet.amount) }}{% elif bet.status == 'lost' %}-{{ "%.2f"|format(bet.amount) }}{% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center text-muted py-5">
+        <i class="bi bi-inbox" style="font-size:3rem;"></i>
+        <p class="mt-3">暂无投注记录</p>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-warning">去投注</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

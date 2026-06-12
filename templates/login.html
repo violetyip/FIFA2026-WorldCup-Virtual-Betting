@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}登录 - FIFA 2026 虚拟赌球{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card bg-dark border-warning">
+            <div class="card-header text-center bg-warning text-dark">
+                <h4 class="mb-0"><i class="bi bi-box-arrow-in-right"></i> 用户登录</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">账号</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-secondary border-secondary text-light"><i class="bi bi-person"></i></span>
+                            <input type="text" name="username" class="form-control bg-dark text-light border-secondary" required autofocus>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100 fw-bold">登 录</button>
+                </form>
+                <hr class="border-secondary">
+                <p class="text-center mb-0">还没有账号？ <a href="{{ url_for('register') }}" class="text-warning">立即注册</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

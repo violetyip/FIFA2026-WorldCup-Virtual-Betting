@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+
+# Local config and secrets
+.env
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Runtime and temporary crawl snapshots
+work_betexplorer*.html
+work_betexplorer*.js
+work_live*.html
+work_oddsportal.html
+
+# Keep this schedule snapshot because init_data.py uses it.
+!work_worldcup.html

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}注册 - FIFA 2026 虚拟赌球{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card bg-dark border-warning">
+            <div class="card-header text-center bg-warning text-dark">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> 新用户注册</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">账号</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-secondary border-secondary text-light"><i class="bi bi-person"></i></span>
+                            <input type="text" name="username" class="form-control bg-dark text-light border-secondary" required autofocus>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100 fw-bold">注 册</button>
+                </form>
+                <div class="alert alert-info mt-3 mb-0 small">
+                    <i class="bi bi-info-circle"></i> 每个账号默认显示 <strong>10,000</strong> 元现实资金；转入网站赌资后才能下注。
+                </div>
+                <hr class="border-secondary">
+                <p class="text-center mb-0">已有账号？ <a href="{{ url_for('login') }}" class="text-warning">立即登录</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

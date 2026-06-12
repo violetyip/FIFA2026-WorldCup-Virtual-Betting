@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}资金管理 - FIFA 2026 虚拟赌球{% endblock %}
+{% block content %}
+<div class="container">
+    <h3 class="text-center text-warning mb-4"><i class="bi bi-wallet2"></i> 资金管理</h3>
+
+    <!-- 余额概览 -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-dark border-warning text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">现实资金</h6>
+                    <h2 class="text-warning mb-0">¥{{ "{:,.2f}".format(current_user.wallet_balance) }}</h2>
+                    <small class="text-muted">现实生活中手里握着的钱</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark border-success text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">网站赌资</h6>
+                    <h2 class="text-success mb-0">¥{{ "{:,.2f}".format(current_user.bet_balance) }}</h2>
+                    <small class="text-muted">转入网站后用于下注的钱</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark border-info text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">总资产</h6>
+                    <h2 class="text-info mb-0">¥{{ "{:,.2f}".format(current_user.wallet_balance + current_user.bet_balance) }}</h2>
+                    <small class="text-muted">现实资金 + 网站赌资</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 转入 / 提回 -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card bg-dark border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-arrow-down-circle"></i> 转入网站赌资</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">从现实资金转入网站赌资，用于下注</p>
+                    <form method="POST" action="{{ url_for('deposit') }}">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-dark border-secondary text-light">¥</span>
+                            <input type="number" name="amount" class="form-control bg-dark text-light border-secondary"
+                                   min="1" max="{{ current_user.wallet_balance }}" step="1" required placeholder="输入金额">
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-secondary quick-deposit" data-amount="1000">1000</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary quick-deposit" data-amount="5000">5000</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning quick-deposit"
+                                    data-amount="{{ current_user.wallet_balance|int }}">全部</button>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold">确认转入</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-dark border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-arrow-up-circle"></i> 提回现实资金</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">从网站赌资转回现实资金，无手续费</p>
+                    <form method="POST" action="{{ url_for('withdraw') }}">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-dark border-secondary text-light">¥</span>
+                            <input type="number" name="amount" class="form-control bg-dark text-light border-secondary"
+                                   min="1" max="{{ current_user.bet_balance }}" step="1" required placeholder="输入金额">
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-secondary quick-withdraw" data-amount="1000">1000</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary quick-withdraw" data-amount="5000">5000</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning quick-withdraw"
+                                    data-amount="{{ current_user.bet_balance|int }}">全部</button>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100 fw-bold">确认提回</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 温馨提示 -->
+    <div class="alert alert-secondary mt-4 text-center">
+        <i class="bi bi-info-circle"></i>
+        转入和提回均无手续费、无其他限制。每个账号默认现实资金为 10,000 元。
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.quick-deposit').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelector('[action="{{ url_for("deposit") }}"] input[name="amount"]').value = this.dataset.amount;
+    });
+});
+document.querySelectorAll('.quick-withdraw').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelector('[action="{{ url_for("withdraw") }}"] input[name="amount"]').value = this.dataset.amount;
+    });
+});
+</script>
+{% endblock %}
