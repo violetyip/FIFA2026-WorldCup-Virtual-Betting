@@ -181,14 +181,11 @@ def check_and_settle_matches():
 
 @app.before_request
 def before_request():
-    check_and_settle_matches()
+    pass
 
 
 @app.route('/')
 def index():
-    check_and_settle_matches()
-    refresh_scores_async()
-    refresh_all_odds_async()
     groups = {}
     matches = Match.query.order_by(Match.match_no).all()
     for m in matches:
@@ -262,9 +259,7 @@ def logout():
 
 @app.route('/match/<int:match_id>')
 def match_detail(match_id):
-    check_and_settle_matches()
     match = Match.query.get_or_404(match_id)
-    refresh_match_odds_async(match.id, force=True)
     odds_list = Odds.query.filter_by(match_id=match_id).all()
 
     # 按盘口类型分组
