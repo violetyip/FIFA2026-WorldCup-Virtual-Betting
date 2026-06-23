@@ -7,10 +7,22 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from models import db, User, Match, Odds, Bet, Transaction
 from odds_updater import update_all_betexplorer_odds, update_finished_scores, update_match_odds, update_match_score
 
+
+def env_int(name, default):
+    try:
+        return int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
 app = Flask(__name__)
+os.makedirs(app.instance_path, exist_ok=True)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-fifa-worldcup-betting-sim-2026')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///betting.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['AUTO_REFRESH_ENABLED'] = os.environ.get('AUTO_REFRESH_ENABLED', '1') == '1'
+app.config['ODDS_REFRESH_INTERVAL_SECONDS'] = env_int('ODDS_REFRESH_INTERVAL_SECONDS', 900)
+app.config['SCORES_REFRESH_INTERVAL_SECONDS'] = env_int('SCORES_REFRESH_INTERVAL_SECONDS', 300)
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -40,10 +52,18 @@ app.jinja_env.globals.update(get_selection_label=get_selection_label)
 REFRESHING_ODDS = set()
 REFRESHING_ALL_ODDS = False
 REFRESHING_SCORES = False
+LAST_ODDS_REFRESH_AT = None
+LAST_SCORES_REFRESH_AT = None
 
 
 def now_bjt():
     return datetime.utcnow() + timedelta(hours=8)
+
+
+def should_refresh(last_refresh_at, interval_seconds):
+    if last_refresh_at is None:
+        return True
+    return (datetime.utcnow() - last_refresh_at).total_seconds() >= interval_seconds
 
 
 def refresh_match_odds_async(match_id, force=False):
@@ -64,10 +84,15 @@ def refresh_match_odds_async(match_id, force=False):
 
 
 def refresh_all_odds_async():
-    global REFRESHING_ALL_ODDS
+    global LAST_ODDS_REFRESH_AT, REFRESHING_ALL_ODDS
+    if not app.config['AUTO_REFRESH_ENABLED']:
+        return
     if REFRESHING_ALL_ODDS:
         return
+    if not should_refresh(LAST_ODDS_REFRESH_AT, app.config['ODDS_REFRESH_INTERVAL_SECONDS']):
+        return
     REFRESHING_ALL_ODDS = True
+    LAST_ODDS_REFRESH_AT = datetime.utcnow()
 
     def worker():
         global REFRESHING_ALL_ODDS
@@ -81,10 +106,15 @@ def refresh_all_odds_async():
 
 
 def refresh_scores_async():
-    global REFRESHING_SCORES
+    global LAST_SCORES_REFRESH_AT, REFRESHING_SCORES
+    if not app.config['AUTO_REFRESH_ENABLED']:
+        return
     if REFRESHING_SCORES:
         return
+    if not should_refresh(LAST_SCORES_REFRESH_AT, app.config['SCORES_REFRESH_INTERVAL_SECONDS']):
+        return
     REFRESHING_SCORES = True
+    LAST_SCORES_REFRESH_AT = datetime.utcnow()
 
     def worker():
         global REFRESHING_SCORES
@@ -383,4 +413,9 @@ def history():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True, port=5001, use_reloader=False)
+    app.run(
+        host='0.0.0.0',
+        port=env_int('PORT', 5001),
+        debug=os.environ.get('FLASK_DEBUG', '0') == '1',
+        use_reloader=False,
+    )

@@ -46,10 +46,12 @@ FIFA/
 ├── models.py              # SQLAlchemy 数据模型
 ├── init_data.py           # 初始化 2026 世界杯赛程和基础赔率数据
 ├── odds_updater.py        # 抓取公开赔率和比分
+├── wsgi.py                # 服务器部署入口
 ├── templates/             # 页面模板
 ├── static/                # 样式和前端脚本
 ├── instance/betting.db    # 本地运行生成的 SQLite 数据库，不建议提交
 ├── requirements.txt       # Python 依赖
+├── requirements-server.txt# 服务器额外依赖（包含 gunicorn）
 └── README.md
 ```
 
@@ -105,6 +107,33 @@ DATABASE_URL=sqlite:///betting.db
 本地开发时不配置环境变量也可以运行。
 
 如果部署到公网，建议至少设置自己的 `SECRET_KEY`，并把 SQLite 换成 PostgreSQL 或其他更适合生产环境的数据库。
+
+## ECS 最简部署
+
+如果只是部署到阿里云 ECS 给朋友使用，最简单可以这样做：
+
+```bash
+git clone https://github.com/violetyip/FIFA-2026-.git
+cd FIFA-2026-
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-server.txt
+python init_data.py
+export SECRET_KEY=change-me
+export FLASK_DEBUG=0
+export PORT=5001
+gunicorn -w 2 -b 0.0.0.0:5001 wsgi:app
+```
+
+服务器上还需要放行安全组端口。如果你前面用 Nginx 反向代理，就开放 `80/443`；如果只是临时给朋友访问，也可以先直接开放 `5001`。
+
+为了避免每个请求都触发赔率和比分抓取，项目现在支持通过环境变量控制自动刷新：
+
+```env
+AUTO_REFRESH_ENABLED=1
+ODDS_REFRESH_INTERVAL_SECONDS=900
+SCORES_REFRESH_INTERVAL_SECONDS=300
+```
 
 ## 数据来源说明
 
